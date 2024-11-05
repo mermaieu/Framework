@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     // PasswordEncoder is provided by org.springframework.security.crypto.password.PasswordEncoder
 
     @Override
-    @CircuitBreaker(name = "circuitBreaker")
+    @CircuitBreaker(name = "circuitBreaker")  // Explicação: https://chatgpt.com/share/6729d8a9-46a0-8011-bbd5-e77db0700d92
     public User save(final User user) {
         User existingUser = userRepository.findByUsername(user.getUsername());
 
@@ -31,6 +31,8 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Existing User");
         }
         String passwordHash = passwordEncoder.encode(user.getPassword());
+        // transforma a senha em uma sequência de caracteres embaralhados (hash)
+        // para que seja armazenada nesse formato, e não como texto puro.
 
         User entity = new User(user.getUserId(), user.getName(), user.getEmail(), user.getUsername(), passwordHash, user.getRole()); // Emerson
 
