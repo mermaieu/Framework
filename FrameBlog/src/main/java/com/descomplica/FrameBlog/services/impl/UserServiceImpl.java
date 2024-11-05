@@ -20,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    // PasswordEncoder is provided by org.springframework.security.crypto.password.PasswordEncoder
 
     @Override
     @CircuitBreaker(name = "circuitBreaker")
@@ -31,11 +32,15 @@ public class UserServiceImpl implements UserService {
         }
         String passwordHash = passwordEncoder.encode(user.getPassword());
 
-        User entity = new User(user.getUserId(), user.getName(), user.getEmail(), passwordHash, user.getUsername(), user.getRole());
+        User entity = new User(user.getUserId(), user.getName(), user.getEmail(), user.getUsername(), passwordHash, user.getRole()); // Emerson
 
         User newUser = userRepository.save(entity);
+        // save da JPA (JpaRepository ou CrudRepository) retorna o próprio objeto salvo no banco de dados,
+        // já com todas as informações atualizadas, incluindo o ID gerado (caso seja uma inserção de um
+        // novo registro).
 
-        return new User(newUser.getUserId(), newUser.getName(), newUser.getEmail(), newUser.getPassword(), newUser.getUsername(), newUser.getRole());
+        return newUser;  // Suggested by Emerson
+        // return new User(newUser.getUserId(), newUser.getName(), newUser.getEmail(), newUser.getUsername(), newUser.getPassword(),newUser.getRole()); // Emerson
     }
 
     @Override
@@ -69,6 +74,4 @@ public class UserServiceImpl implements UserService {
     public void delete(final Long id){
         userRepository.deleteById(id);
     }
-
-
 }
