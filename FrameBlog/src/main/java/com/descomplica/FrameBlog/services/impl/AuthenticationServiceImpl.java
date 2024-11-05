@@ -22,15 +22,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Autowired
     private UserRepository userRepository;
 
-    @Override
+    @Override  // Sobrescreve loadUserByUsername da interface UserDetailsService estendida por AuthenticationService
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException{
         return userRepository.findByUsername(login);
     }
 
-    @Override
-    public String getToken(AuthRequest auth){
+    @Override  // Sobrescreve getToken da interface AuthenticationService
+    public String getToken(AuthRequest auth){  // Usado em AuthenticationController
         User user = userRepository.findByUsername(auth.getUsername());
         return generateToken(user);
+    }
+
+    @Override  // Sobrescreve validateJwtToken da interface AuthenticationService
+    public String validateJwtToken(String token) {  // Usado em SecurityFilter
+        try {
+            Algorithm algorithm = Algorithm.HMAC256("my-secret");
+
+            return JWT.require(algorithm)
+                    .withIssuer("FrameBlog")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+
+        } catch (JWTVerificationException exception) {
+            return "";
+        }
     }
 
     public  String generateToken(User user) {
@@ -47,20 +63,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    public String validateJwtToken(String token) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256("my-secret");
-
-            return JWT.require(algorithm)
-                    .withIssuer("FrameBlog")
-                    .build()
-                    .verify(token)
-                    .getSubject();
-
-        } catch (JWTVerificationException exception) {
-            return "";
-        }
-    }
     private Instant getExpirationDate() {
         return LocalDateTime.now()
                 .plusHours(8)
